@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: gitlab
+  name: gitlab
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gitlab
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gitlab
+    spec:
+      initContainers:
+      - name: openssl
+        image: ruby:2.6.3
+        command: [openssl]
+        args: [
+            "req", "-x509", "-nodes", "-days", "365", "-newkey", "rsa:2048", "-keyout", "/shared/gitlab.key", "-out", "/shared/gitlab.crt", "-subj", "/C=/ST=/L=/O=/OU=/CN=gitlab"]
+        volumeMounts:
+        - mountPath: /shared
+          name: shared
+      containers:
+      - name: gitlab
+        image: gitlab/gitlab-ce:11.10.0-ce.0
+        env:
+        - name: GITLAB_OMNIBUS_CONFIG
+          value: "external_url 'https://gitlab/';"
+        ports:
+        - containerPort: 443
+        - containerPort: 22
+        volumeMounts:
+        - mountPath: /etc/gitlab/ssl/
+          name: shared
+      volumes:
+      - emptyDir: {}
+        name: shared
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: gitlab
+  name: gitlab
+spec:
+  ports:
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 443
+  - name: ssh
+    protocol: TCP
+    port: 22
+    targetPort: 22
+  selector:
+    app.kubernetes.io/name: gitlab
+  type: LoadBalancer

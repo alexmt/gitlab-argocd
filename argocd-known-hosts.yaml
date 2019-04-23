@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-known-hosts
+data:
+  known_hosts: |-
+    35.188.155.92 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAncWFU8Z3CZGh0zVfZ2znwp6a+ljhbhcOEX0rhKkzvaUwgSL12lnsIPY+9QxnwCBwSpX5T/VconCDa8+4YOpsc=
